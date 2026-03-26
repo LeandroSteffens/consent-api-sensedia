@@ -7,16 +7,16 @@ A API garante um modelo de dados limpo, endpoints bem definidos, código testáv
 ## 📋 Checklist de Requisitos do Desafio
 
 ### 1. Requisitos Funcionais (Endpoints)
-- [ ] `POST /consents`: Criar um novo consentimento.
-- [ ] `GET /consents`: Listar todos os consentimentos (com paginação).
-- [ ] `GET /consents/{id}`: Buscar um consentimento específico por ID.
-- [ ] `PUT /consents/{id}`: Atualizar informações (ex: estender data de expiração).
-- [ ] `DELETE /consents/{id}`: Revogar um consentimento (Alterar status para `REVOKED` ou exclusão lógica).
+- [x] `POST /consents`: Criar um novo consentimento.
+- [x] `GET /consents`: Listar todos os consentimentos (com paginação).
+- [x] `GET /consents/{id}`: Buscar um consentimento específico por ID.
+- [x] `PUT /consents/{id}`: Atualizar informações (ex: estender data de expiração).
+- [x] `DELETE /consents/{id}`: Revogar um consentimento (Alterar status para `REVOKED` ou exclusão lógica).
 
 ### 2. Regra de Negócio: Idempotência (Obrigatório)
-- [ ] Receber e processar o header personalizado `X-Idempotency-Key` no endpoint `POST /consents`.
-- [ ] Garantir que chamadas com a mesma chave não criem registros duplicados no banco.
-- [ ] Em caso de reenvio com a mesma chave, retornar HTTP Status `200 OK` com o corpo do recurso criado na primeira tentativa (em vez de `201 Created`).
+- [x] Receber e processar o header personalizado `X-Idempotency-Key` no endpoint `POST /consents`.
+- [x] Garantir que chamadas com a mesma chave não criem registros duplicados no banco.
+- [x] Em caso de reenvio com a mesma chave, retornar HTTP Status `200 OK` com o corpo do recurso criado na primeira tentativa (em vez de `201 Created`).
 
 ### 3. Modelo de Dados e Validações
 - [x] `id`: UUID (Gerado pelo sistema).
@@ -42,9 +42,9 @@ A API garante um modelo de dados limpo, endpoints bem definidos, código testáv
 - [ ] Cobertura adequada e clareza nos testes.
 
 ### 6. Boas Práticas e Entrega
-- [ ] Documentação da API com Swagger (OpenAPI).
-- [ ] Histórico do Git utilizando Commits Semânticos (ex: `feat: ...`, `fix: ...`, `test: ...`).
-- [ ] Código em repositório público (ex: `consent-api`).
+- [x] Documentação da API com Swagger (OpenAPI).
+- [x] Histórico do Git utilizando Commits Semânticos (ex: `feat: ...`, `fix: ...`, `test: ...`).
+- [x] Código em repositório público (ex: `consent-api`).
 - [ ] README contendo instruções claras de como compilar e executar a aplicação.
 
 ### 7. Diferenciais (Bônus)
