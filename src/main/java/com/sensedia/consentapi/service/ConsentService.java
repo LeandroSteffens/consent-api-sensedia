@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,7 +24,9 @@ public class ConsentService {
     private final ConsentRepository repository;
     private final ConsentMapper mapper;
 
-    // Classe auxiliar para o Controller saber se deve retornar 201 ou 200
+    /**
+     * Classe auxiliar para transportar o resultado da criação e o status (Created ou OK).
+     */
     public static class CreationResult {
         private final ConsentResponse response;
         private final boolean isCreated;
@@ -36,36 +39,59 @@ public class ConsentService {
         public boolean isCreated() { return isCreated; }
     }
 
-    // REGRA DE IDEMPOTÊNCIA
+    /**
+     * REGRA DE IDEMPOTÊNCIA: Cria um consentimento ou retorna um existente caso a chave seja repetida.
+     */
     public CreationResult createConsent(String idempotencyKey, ConsentCreateRequest request) {
+        // 1. Verifica se já existe um registro com esta chave de idempotência
         Optional<Consent> existingConsent = repository.findByIdempotencyKey(idempotencyKey);
 
         if (existingConsent.isPresent()) {
-            // Se a chave já existe, retorna o recurso e avisa que NÃO foi criado um novo
+            // Se já existe, retorna o recurso e avisa que NÃO foi criado um novo (Status 200)
             return new CreationResult(mapper.toResponse(existingConsent.get()), false);
         }
 
+        // 2. Mapeia o DTO para a Entidade de Domínio
         Consent consent = mapper.toEntity(request);
+
+        // 3. Garantia de Identidade e Auditoria Manual
+        // Necessário pois o MongoDB não autogera UUID e a auditoria falha com IDs manuais
+        if (consent.getId() == null) {
+            consent.setId(UUID.randomUUID());
+        }
+
+        // Garante que a data de criação não venha nula no Swagger
+        if (consent.getCreationDateTime() == null) {
+            consent.setCreationDateTime(LocalDateTime.now());
+        }
+
         consent.setIdempotencyKey(idempotencyKey);
 
+        // 4. Persiste no MongoDB
         Consent savedConsent = repository.save(consent);
 
-        // Retorna o recurso salvo e avisa que FOI criado
+        // 5. Retorna o recurso salvo e confirma a criação (Status 201)
         return new CreationResult(mapper.toResponse(savedConsent), true);
     }
 
-    // LISTAGEM COM PAGINAÇÃO
+    /**
+     * Busca todos os consentimentos com suporte a paginação.
+     */
     public Page<ConsentResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
 
-    // BUSCA POR ID
+    /**
+     * Busca um consentimento específico pelo seu UUID.
+     */
     public ConsentResponse findById(UUID id) {
         Consent consent = getConsentByIdOrThrow(id);
         return mapper.toResponse(consent);
     }
 
-    // ATUALIZAÇÃO
+    /**
+     * Atualiza dados de um consentimento existente.
+     */
     public ConsentResponse update(UUID id, ConsentUpdateRequest request) {
         Consent consent = getConsentByIdOrThrow(id);
         mapper.updateEntityFromRequest(request, consent);
@@ -73,14 +99,18 @@ public class ConsentService {
         return mapper.toResponse(updatedConsent);
     }
 
-    // REVOGAÇÃO (Alterar status para REVOKED)
+    /**
+     * Revoga um consentimento alterando seu status.
+     */
     public void revoke(UUID id) {
         Consent consent = getConsentByIdOrThrow(id);
         consent.setStatus(ConsentStatus.REVOKED);
         repository.save(consent);
     }
 
-    // Metodo privado para evitar repetição de código nas buscas
+    /**
+     * Metodo auxiliar para centralizar a lógica de busca e erro 404.
+     */
     private Consent getConsentByIdOrThrow(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Consentimento não encontrado com o ID: " + id));

@@ -1,5 +1,6 @@
 package com.sensedia.consentapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sensedia.consentapi.domain.ConsentStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,10 +20,10 @@ public class ConsentCreateRequest {
     @NotNull(message = "O status é obrigatório")
     private ConsentStatus status;
 
-    // Opcional, sem validação de obrigatoriedade
+    // Ajuste para aceitar o formato ISO com 'Z'
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private LocalDateTime expirationDateTime;
 
-    // Opcional, mas se for enviado, deve respeitar o tamanho mínimo e máximo
     @Size(min = 1, max = 50, message = "O campo additionalInfo deve ter entre 1 e 50 caracteres")
     private String additionalInfo;
 }

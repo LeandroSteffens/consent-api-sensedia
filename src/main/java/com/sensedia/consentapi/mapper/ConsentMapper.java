@@ -8,24 +8,33 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-// O componentModel = "spring" diz ao MapStruct para transformar essa interface
-// em um Bean do Spring, permitindo que a gente use @Autowired ou injeção via construtor.
+/**
+ * Interface de mapeamento entre as Entidades de Domínio e os DTOs.
+ * O componentModel = "spring" permite que esta classe seja injetada como um Bean do Spring.
+ */
 @Mapper(componentModel = "spring")
 public interface ConsentMapper {
 
-    // Converte o DTO de criação para a Entidade.
-    // Ignoramos o ID, data de criação e chave de idempotência porque o sistema vai gerá-los.
+    /**
+     * Converte o DTO de criação para a Entidade de domínio.
+     * Ignoramos campos que não devem ser definidos pelo usuário no momento da criação.
+     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "creationDateTime", ignore = true)
     @Mapping(target = "idempotencyKey", ignore = true)
     Consent toEntity(ConsentCreateRequest request);
 
-    // Converte a Entidade salva no banco para o DTO de resposta que o usuário vai ver.
+    /**
+     * Converte a Entidade de domínio para o DTO de resposta.
+     * Este é o objeto que o Swagger e o cliente da API receberão.
+     */
     ConsentResponse toResponse(Consent consent);
 
-    // Atualiza uma entidade existente com os dados do DTO de atualização (usado no PUT).
-    // O @MappingTarget avisa o MapStruct para não criar um objeto novo, mas sim
-    // jogar os dados do 'request' para dentro do 'consent' que já existe.
+    /**
+     * Atualiza uma entidade existente com base nos dados de um DTO de atualização.
+     * O uso de @MappingTarget garante que a entidade original seja modificada em vez de criar uma nova.
+     * CPF, ID e Data de Criação são imutáveis após a criação do consentimento.
+     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "cpf", ignore = true)
     @Mapping(target = "creationDateTime", ignore = true)
