@@ -19,13 +19,13 @@ A API garante um modelo de dados limpo, endpoints bem definidos, código testáv
 - [ ] Em caso de reenvio com a mesma chave, retornar HTTP Status `200 OK` com o corpo do recurso criado na primeira tentativa (em vez de `201 Created`).
 
 ### 3. Modelo de Dados e Validações
-- [ ] `id`: UUID (Gerado pelo sistema).
-- [ ] `cpf`: String com validação de formato (`###.###.###-##`).
-- [ ] `status`: Enum (`ACTIVE`, `REVOKED`, `EXPIRED`).
-- [ ] `creationDateTime`: LocalDateTime (Gerado automaticamente).
-- [ ] `expirationDateTime`: LocalDateTime (Opcional).
-- [ ] `additionalInfo`: String (Opcional, tamanho máximo 50, mínimo 1).
-- [ ] Uso de Bean Validation (`@Valid`, `@NotNull`, `@Pattern`, `@Size`, etc.).
+- [x] `id`: UUID (Gerado pelo sistema).
+- [x] `cpf`: String com validação de formato (`###.###.###-##`).
+- [x] `status`: Enum (`ACTIVE`, `REVOKED`, `EXPIRED`).
+- [x] `creationDateTime`: LocalDateTime (Gerado automaticamente).
+- [x] `expirationDateTime`: LocalDateTime (Opcional).
+- [x] `additionalInfo`: String (Opcional, tamanho máximo 50, mínimo 1).
+- [x] Uso de Bean Validation (`@Valid`, `@NotNull`, `@Pattern`, `@Size`, etc.).
 
 ### 4. Requisitos Técnicos e Arquitetura
 - [ ] Linguagem: Java 21 ou superior.
