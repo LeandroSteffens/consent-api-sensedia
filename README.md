@@ -33,8 +33,8 @@ A API garante um modelo de dados limpo, endpoints bem definidos, código testáv
 - [x] Gerenciador de dependências: Maven.
 - [x] Persistência: MongoDB (Preferencial) ou Relacional (H2/PostgreSQL).
 - [x] Mapeamento de objetos: Uso de DTOs e MapStruct (ou similar).
-- [ ] Tratamento de Erros: Uso de `@ControllerAdvice` para retornar erros estruturados (ex: 400 Bad Request para CPF inválido).
-- [ ] Estrutura do projeto organizada em camadas (`domain`, `dto`, `service`, `repository`).
+- [x] Tratamento de Erros: Uso de `@ControllerAdvice` para retornar erros estruturados (ex: 400 Bad Request para CPF inválido).
+- [x] Estrutura do projeto organizada em camadas (`domain`, `dto`, `service`, `repository`).
 
 ### 5. Testes e Qualidade
 - [ ] Testes unitários com JUnit 5 e Mockito.
