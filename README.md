@@ -28,11 +28,11 @@ A API garante um modelo de dados limpo, endpoints bem definidos, código testáv
 - [x] Uso de Bean Validation (`@Valid`, `@NotNull`, `@Pattern`, `@Size`, etc.).
 
 ### 4. Requisitos Técnicos e Arquitetura
-- [ ] Linguagem: Java 21 ou superior.
-- [ ] Framework: Spring Boot.
-- [ ] Gerenciador de dependências: Maven.
-- [ ] Persistência: MongoDB (Preferencial) ou Relacional (H2/PostgreSQL).
-- [ ] Mapeamento de objetos: Uso de DTOs e MapStruct (ou similar).
+- [x] Linguagem: Java 21 ou superior.
+- [x] Framework: Spring Boot.
+- [x] Gerenciador de dependências: Maven.
+- [x] Persistência: MongoDB (Preferencial) ou Relacional (H2/PostgreSQL).
+- [x] Mapeamento de objetos: Uso de DTOs e MapStruct (ou similar).
 - [ ] Tratamento de Erros: Uso de `@ControllerAdvice` para retornar erros estruturados (ex: 400 Bad Request para CPF inválido).
 - [ ] Estrutura do projeto organizada em camadas (`domain`, `dto`, `service`, `repository`).
 
