@@ -102,10 +102,11 @@ public class ConsentService {
     /**
      * Revoga um consentimento alterando seu status.
      */
-    public void revoke(UUID id) {
+    public ConsentResponse revoke(UUID id) {
         Consent consent = getConsentByIdOrThrow(id);
         consent.setStatus(ConsentStatus.REVOKED);
-        repository.save(consent);
+        Consent savedConsent = repository.save(consent);
+        return mapper.toResponse(savedConsent);
     }
 
     /**

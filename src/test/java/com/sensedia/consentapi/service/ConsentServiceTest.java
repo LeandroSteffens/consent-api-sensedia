@@ -87,20 +87,26 @@ class ConsentServiceTest {
     }
 
     @Test
-    @DisplayName("Deve alterar o status para REVOKED ao chamar o método revoke")
+    @DisplayName("Deve alterar o status para REVOKED ao chamar o método revoke e retornar a resposta")
     void deveRevogarConsentimentoComSucesso() {
         // Arrange
         UUID id = UUID.randomUUID();
         Consent consent = new Consent();
         consent.setStatus(ConsentStatus.ACTIVE); // Nasce como ativo
 
+        ConsentResponse responseMock = new ConsentResponse();
+        responseMock.setStatus(ConsentStatus.REVOKED);
+
         when(repository.findById(id)).thenReturn(Optional.of(consent));
+        when(repository.save(any(Consent.class))).thenReturn(consent);
+        when(mapper.toResponse(any(Consent.class))).thenReturn(responseMock);
 
         // Act
-        service.revoke(id);
+        ConsentResponse result = service.revoke(id);
 
         // Assert
-        assertEquals(ConsentStatus.REVOKED, consent.getStatus()); // Garante a mudança de status
+        assertEquals(ConsentStatus.REVOKED, consent.getStatus()); // Garante a mudança na Entidade
+        assertEquals(ConsentStatus.REVOKED, result.getStatus()); // Garante que o Response retornou o status certo
         verify(repository, times(1)).save(consent); // Garante que a alteração foi persistida
     }
 }

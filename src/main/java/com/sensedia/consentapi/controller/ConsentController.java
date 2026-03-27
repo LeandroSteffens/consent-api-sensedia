@@ -68,10 +68,10 @@ public class ConsentController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Revogar um consentimento", description = "Altera o status do consentimento para REVOKED")
+    @Operation(summary = "Revogar um consentimento", description = "Altera o status do consentimento para REVOKED e retorna o objeto atualizado")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> revokeConsent(@PathVariable UUID id) {
-        service.revoke(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+    public ResponseEntity<ConsentResponse> revokeConsent(@PathVariable UUID id) {
+        ConsentResponse response = service.revoke(id);
+        return ResponseEntity.ok(response);
     }
 }
