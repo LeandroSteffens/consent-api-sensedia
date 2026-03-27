@@ -1,54 +1,63 @@
-# Consent API - Open Insurance Brasil (Desafio Sensedia)
+# API de Consentimentos - Open Insurance Brasil
 
-Este projeto é uma API REST para gestão de consentimentos de usuários no ecossistema de Open Insurance, desenvolvida como parte do desafio técnico para a posição de Software Developer Júnior na Sensedia. 
+Este projeto é uma API REST para gestão de consentimentos de usuários no ecossistema de Open Insurance, desenvolvida como parte do desafio técnico para a posição de Software Developer Júnior na Sensedia.
 
-A API garante um modelo de dados limpo, endpoints bem definidos, código testável e aplica o pilar de segurança e privacidade exigido pelo contexto de OPIN (Open Insurance), incluindo o tratamento rigoroso de idempotência.
+## Tecnologias Utilizadas
 
-## 📋 Checklist de Requisitos do Desafio
+- Java 21
+- Spring Boot 3.3.4 (Web, Validation, Data MongoDB)
+- MongoDB
+- Lombok
+- MapStruct
+- OpenAPI / Swagger
+- JUnit 5 & Mockito
+- Testcontainers
+- Docker & Docker Compose
 
-### 1. Requisitos Funcionais (Endpoints)
-- [x] `POST /consents`: Criar um novo consentimento.
-- [x] `GET /consents`: Listar todos os consentimentos (com paginação).
-- [x] `GET /consents/{id}`: Buscar um consentimento específico por ID.
-- [x] `PUT /consents/{id}`: Atualizar informações (ex: estender data de expiração).
-- [x] `DELETE /consents/{id}`: Revogar um consentimento (Alterar status para `REVOKED` ou exclusão lógica).
+## Funcionalidades e Regras de Negócio
 
-### 2. Regra de Negócio: Idempotência (Obrigatório)
-- [x] Receber e processar o header personalizado `X-Idempotency-Key` no endpoint `POST /consents`.
-- [x] Garantir que chamadas com a mesma chave não criem registros duplicados no banco.
-- [x] Em caso de reenvio com a mesma chave, retornar HTTP Status `200 OK` com o corpo do recurso criado na primeira tentativa (em vez de `201 Created`).
+- Idempotência: O endpoint de criação (POST /consents) exige o cabeçalho X-Idempotency-Key. Requisições subsequentes com a mesma chave não geram duplicidade no banco de dados e retornam status 200 OK com o recurso originalmente criado.
+- Exclusão Lógica: A revogação de um consentimento (DELETE /consents/{id}) altera o status do registro para REVOKED, mantendo o histórico na base de dados e retornando o objeto atualizado.
+- Paginação: A listagem de consentimentos (GET /consents) implementa paginação nativa através da interface Pageable do Spring Data.
+- Tratamento Global de Exceções: Utilização de @RestControllerAdvice para interceptar erros de validação (Bean Validation) e recursos não encontrados, padronizando o formato da resposta de erro.
+- Proteção de Dados Sensíveis: O endpoint de atualização (PUT /consents/{id}) utiliza DTOs e MapStruct configurados para ignorar campos imutáveis, como ID, CPF e Data de Criação.
 
-### 3. Modelo de Dados e Validações
-- [x] `id`: UUID (Gerado pelo sistema).
-- [x] `cpf`: String com validação de formato (`###.###.###-##`).
-- [x] `status`: Enum (`ACTIVE`, `REVOKED`, `EXPIRED`).
-- [x] `creationDateTime`: LocalDateTime (Gerado automaticamente).
-- [x] `expirationDateTime`: LocalDateTime (Opcional).
-- [x] `additionalInfo`: String (Opcional, tamanho máximo 50, mínimo 1).
-- [x] Uso de Bean Validation (`@Valid`, `@NotNull`, `@Pattern`, `@Size`, etc.).
+## Pré-requisitos
 
-### 4. Requisitos Técnicos e Arquitetura
-- [x] Linguagem: Java 21 ou superior.
-- [x] Framework: Spring Boot.
-- [x] Gerenciador de dependências: Maven.
-- [x] Persistência: MongoDB (Preferencial) ou Relacional (H2/PostgreSQL).
-- [x] Mapeamento de objetos: Uso de DTOs e MapStruct (ou similar).
-- [x] Tratamento de Erros: Uso de `@ControllerAdvice` para retornar erros estruturados (ex: 400 Bad Request para CPF inválido).
-- [x] Estrutura do projeto organizada em camadas (`domain`, `dto`, `service`, `repository`).
+Para executar este projeto, é necessário ter instalado:
+- Java 21
+- Docker e Docker Compose
 
-### 5. Testes e Qualidade
-- [ ] Testes unitários com JUnit 5 e Mockito.
-- [ ] Testes de integração utilizando Testcontainers (para o banco de dados escolhido).
-- [ ] Cobertura adequada e clareza nos testes.
+## Como Executar a Aplicação
 
-### 6. Boas Práticas e Entrega
-- [x] Documentação da API com Swagger (OpenAPI).
-- [x] Histórico do Git utilizando Commits Semânticos (ex: `feat: ...`, `fix: ...`, `test: ...`).
-- [x] Código em repositório público (ex: `consent-api`).
-- [ ] README contendo instruções claras de como compilar e executar a aplicação.
+Passo 1: Suba a infraestrutura do banco de dados (MongoDB) utilizando o Docker Compose:
+> docker-compose up -d
 
-### 7. Diferenciais (Bônus)
-- [ ] Integração com WebClient para chamadas externas (se aplicável na modelagem).
-- [ ] Histórico de alterações (Changelog).
-- [ ] Arquivo `Dockerfile` configurado.
-- [ ] Arquivo `docker-compose.yml` para subir a aplicação e dependências (banco de dados) com facilidade.
+Passo 2: Na raiz do projeto, inicie a aplicação utilizando o Maven Wrapper:
+> ./mvnw spring-boot:run
+
+Passo 3: Acesse a documentação interativa da API (Swagger UI) pelo navegador:
+> http://localhost:8080/swagger-ui.html
+
+## Como Executar os Testes
+
+O projeto possui uma suíte de testes unitários e de integração. Os testes de integração utilizam a biblioteca Testcontainers para provisionar contêineres efêmeros do MongoDB, garantindo isolamento completo da base de dados.
+
+Para rodar a suíte completa de testes, execute na raiz do projeto:
+> ./mvnw clean test
+
+## Solução de Problemas Comuns
+
+Caso encontre problemas ao rodar o projeto ou os testes, verifique as soluções abaixo:
+
+1. Erro nos testes: "Could not find a valid Docker environment" ou "BadRequestException (Status 400)"
+Causa: Incompatibilidade de comunicação entre o Testcontainers e versões recentes do Docker Desktop (v29+), ou o Docker não está em execução.
+Solução: Certifique-se de que o Docker Desktop está aberto e rodando. O projeto já está configurado no pom.xml com a versão 1.21.4 do testcontainers, que resolve nativamente o conflito com a nova API do Docker.
+
+2. Erro: "Port 8080 was already in use" ou "Port 27017 was already in use"
+Causa: Outro serviço ou aplicação na sua máquina já está ocupando a porta da API ou do banco de dados.
+Solução: Para o banco de dados, pare outros containers do MongoDB que possam estar rodando. Para a API, encerre o processo que está usando a porta 8080 ou altere a porta da aplicação adicionando server.port=8081 no arquivo application.properties.
+
+3. Erro de compilação: "cannot find symbol" (Getters/Setters não encontrados)
+Causa: A IDE ou o compilador não processou as anotações do Lombok corretamente.
+Solução: Execute uma limpeza completa com o comando ./mvnw clean install. Se estiver utilizando IntelliJ IDEA, certifique-se de que a opção "Enable Annotation Processing" está ativada nas configurações do projeto.
