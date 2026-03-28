@@ -7,6 +7,7 @@ import com.sensedia.consentapi.dto.ConsentCreateRequest;
 import com.sensedia.consentapi.dto.ConsentResponse;
 import com.sensedia.consentapi.exception.ResourceNotFoundException;
 import com.sensedia.consentapi.mapper.ConsentMapper;
+import com.sensedia.consentapi.repository.ConsentHistoryRepository;
 import com.sensedia.consentapi.repository.ConsentRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ class ConsentServiceTest {
 
     @Mock
     private ViaCepClient viaCepClient;
+
+    @Mock
+    private ConsentHistoryRepository historyRepository;
 
     @InjectMocks
     private ConsentService service;

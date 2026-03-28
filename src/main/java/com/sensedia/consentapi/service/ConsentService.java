@@ -3,12 +3,14 @@ package com.sensedia.consentapi.service;
 import com.sensedia.consentapi.client.ViaCepClient;
 import com.sensedia.consentapi.client.ViaCepResponse;
 import com.sensedia.consentapi.domain.Consent;
+import com.sensedia.consentapi.domain.ConsentHistory;
 import com.sensedia.consentapi.domain.ConsentStatus;
 import com.sensedia.consentapi.dto.ConsentCreateRequest;
 import com.sensedia.consentapi.dto.ConsentResponse;
 import com.sensedia.consentapi.dto.ConsentUpdateRequest;
 import com.sensedia.consentapi.exception.ResourceNotFoundException;
 import com.sensedia.consentapi.mapper.ConsentMapper;
+import com.sensedia.consentapi.repository.ConsentHistoryRepository;
 import com.sensedia.consentapi.repository.ConsentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +31,7 @@ public class ConsentService {
     private final ConsentRepository repository;
     private final ConsentMapper mapper;
     private final ViaCepClient viaCepClient;
+    private final ConsentHistoryRepository historyRepository;
 
     /**
      * Wrapper para retorno de criação, diferenciando novos registros de retornos por idempotência.
@@ -77,6 +80,7 @@ public class ConsentService {
         }
 
         Consent savedConsent = repository.save(consent);
+        registerHistory(savedConsent, "CREATE");
         return new CreationResult(mapper.toResponse(savedConsent), true);
     }
 
@@ -100,7 +104,11 @@ public class ConsentService {
     public ConsentResponse update(UUID id, ConsentUpdateRequest request) {
         Consent consent = getConsentByIdOrThrow(id);
         mapper.updateEntityFromRequest(request, consent);
-        return mapper.toResponse(repository.save(consent));
+
+        Consent updatedConsent = repository.save(consent);
+        registerHistory(updatedConsent, "UPDATE");
+
+        return mapper.toResponse(updatedConsent);
     }
 
     /**
@@ -109,7 +117,11 @@ public class ConsentService {
     public ConsentResponse revoke(UUID id) {
         Consent consent = getConsentByIdOrThrow(id);
         consent.setStatus(ConsentStatus.REVOKED);
-        return mapper.toResponse(repository.save(consent));
+
+        Consent savedConsent = repository.save(consent);
+        registerHistory(savedConsent, "REVOKE");
+
+        return mapper.toResponse(savedConsent);
     }
 
     /**
@@ -118,5 +130,20 @@ public class ConsentService {
     private Consent getConsentByIdOrThrow(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Consentimento não encontrado com o ID: " + id));
+    }
+
+    /**
+     * Salva uma cópia exata do estado atual do consentimento para fins de auditoria.
+     */
+    private void registerHistory(Consent consent, String action) {
+        ConsentHistory history = ConsentHistory.builder()
+                .id(UUID.randomUUID())
+                .consentId(consent.getId())
+                .action(action)
+                .consentSnapshot(consent)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        historyRepository.save(history);
     }
 }
