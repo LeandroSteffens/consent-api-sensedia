@@ -6,6 +6,7 @@ Este projeto é uma API REST para gestão de consentimentos de usuários no ecos
 
 - Java 21
 - Spring Boot 3.3.4 (Web, Validation, Data MongoDB)
+- Spring WebFlux (WebClient para consumo de API externa)
 - MongoDB
 - Lombok
 - MapStruct
@@ -17,6 +18,7 @@ Este projeto é uma API REST para gestão de consentimentos de usuários no ecos
 ## Funcionalidades e Regras de Negócio
 
 - Idempotência: O endpoint de criação (POST /consents) exige o cabeçalho X-Idempotency-Key. Requisições subsequentes com a mesma chave não geram duplicidade no banco de dados e retornam status 200 OK com o recurso originalmente criado.
+- Integração e Enriquecimento: Utilização de WebClient para consultar a API externa ViaCEP. Caso um CEP válido seja enviado, os dados de endereço são populados automaticamente no registro de consentimento.
 - Exclusão Lógica: A revogação de um consentimento (DELETE /consents/{id}) altera o status do registro para REVOKED, mantendo o histórico na base de dados e retornando o objeto atualizado.
 - Paginação: A listagem de consentimentos (GET /consents) implementa paginação nativa através da interface Pageable do Spring Data.
 - Tratamento Global de Exceções: Utilização de @RestControllerAdvice para interceptar erros de validação (Bean Validation) e recursos não encontrados, padronizando o formato da resposta de erro.
@@ -51,13 +53,13 @@ Para rodar a suíte completa de testes, execute na raiz do projeto:
 Caso encontre problemas ao rodar o projeto ou os testes, verifique as soluções abaixo:
 
 1. Erro nos testes: "Could not find a valid Docker environment" ou "BadRequestException (Status 400)"
-Causa: Incompatibilidade de comunicação entre o Testcontainers e versões recentes do Docker Desktop (v29+), ou o Docker não está em execução.
-Solução: Certifique-se de que o Docker Desktop está aberto e rodando. O projeto já está configurado no pom.xml com a versão 1.21.4 do testcontainers, que resolve nativamente o conflito com a nova API do Docker.
+   Causa: Incompatibilidade de comunicação entre o Testcontainers e versões recentes do Docker Desktop (v29+), ou o Docker não está em execução.
+   Solução: Certifique-se de que o Docker Desktop está aberto e rodando. O projeto já está configurado no pom.xml com a versão 1.21.4 do testcontainers, que resolve nativamente o conflito com a nova API do Docker.
 
 2. Erro: "Port 8080 was already in use" ou "Port 27017 was already in use"
-Causa: Outro serviço ou aplicação na sua máquina já está ocupando a porta da API ou do banco de dados.
-Solução: Para o banco de dados, pare outros containers do MongoDB que possam estar rodando. Para a API, encerre o processo que está usando a porta 8080 ou altere a porta da aplicação adicionando server.port=8081 no arquivo application.properties.
+   Causa: Outro serviço ou aplicação na sua máquina já está ocupando a porta da API ou do banco de dados.
+   Solução: Para o banco de dados, pare outros containers do MongoDB que possam estar rodando. Para a API, encerre o processo que está usando a porta 8080 ou altere a porta da aplicação adicionando server.port=8081 no arquivo application.properties.
 
 3. Erro de compilação: "cannot find symbol" (Getters/Setters não encontrados)
-Causa: A IDE ou o compilador não processou as anotações do Lombok corretamente.
-Solução: Execute uma limpeza completa com o comando ./mvnw clean install. Se estiver utilizando IntelliJ IDEA, certifique-se de que a opção "Enable Annotation Processing" está ativada nas configurações do projeto.
+   Causa: A IDE ou o compilador não processou as anotações do Lombok corretamente.
+   Solução: Execute uma limpeza completa com o comando ./mvnw clean install. Se estiver utilizando IntelliJ IDEA, certifique-se de que a opção "Enable Annotation Processing" está ativada nas configurações do projeto.
