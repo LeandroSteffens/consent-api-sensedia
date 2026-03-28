@@ -1,5 +1,7 @@
 package com.sensedia.consentapi.service;
 
+import com.sensedia.consentapi.client.ViaCepClient;
+import com.sensedia.consentapi.client.ViaCepResponse;
 import com.sensedia.consentapi.domain.Consent;
 import com.sensedia.consentapi.domain.ConsentStatus;
 import com.sensedia.consentapi.dto.ConsentCreateRequest;
@@ -17,15 +19,19 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Orquestrador das regras de negócio para gestão de consentimentos.
+ */
 @Service
 @RequiredArgsConstructor
 public class ConsentService {
 
     private final ConsentRepository repository;
     private final ConsentMapper mapper;
+    private final ViaCepClient viaCepClient;
 
     /**
-     * Classe auxiliar para transportar o resultado da criação e o status (Created ou OK).
+     * Wrapper para retorno de criação, diferenciando novos registros de retornos por idempotência.
      */
     public static class CreationResult {
         private final ConsentResponse response;
@@ -40,77 +46,74 @@ public class ConsentService {
     }
 
     /**
-     * REGRA DE IDEMPOTÊNCIA: Cria um consentimento ou retorna um existente caso a chave seja repetida.
+     * Implementa a criação de consentimento com suporte a idempotência e enriquecimento de endereço.
      */
     public CreationResult createConsent(String idempotencyKey, ConsentCreateRequest request) {
-        // 1. Verifica se já existe um registro com esta chave de idempotência
+        // Validação de idempotência
         Optional<Consent> existingConsent = repository.findByIdempotencyKey(idempotencyKey);
-
         if (existingConsent.isPresent()) {
-            // Se já existe, retorna o recurso e avisa que NÃO foi criado um novo (Status 200)
             return new CreationResult(mapper.toResponse(existingConsent.get()), false);
         }
 
-        // 2. Mapeia o DTO para a Entidade de Domínio
         Consent consent = mapper.toEntity(request);
 
-        // 3. Garantia de Identidade e Auditoria Manual
-        // Necessário pois o MongoDB não autogera UUID e a auditoria falha com IDs manuais
-        if (consent.getId() == null) {
-            consent.setId(UUID.randomUUID());
-        }
-
-        // Garante que a data de criação não venha nula no Swagger
-        if (consent.getCreationDateTime() == null) {
-            consent.setCreationDateTime(LocalDateTime.now());
-        }
+        // Atribuição de ID e auditoria manual para conformidade com MongoDB
+        if (consent.getId() == null) consent.setId(UUID.randomUUID());
+        if (consent.getCreationDateTime() == null) consent.setCreationDateTime(LocalDateTime.now());
 
         consent.setIdempotencyKey(idempotencyKey);
 
-        // 4. Persiste no MongoDB
-        Consent savedConsent = repository.save(consent);
+        // Enriquecimento de dados via integração externa
+        if (request.getCep() != null && !request.getCep().isBlank()) {
+            ViaCepResponse addressInfo = viaCepClient.getAddressByCep(request.getCep());
 
-        // 5. Retorna o recurso salvo e confirma a criação (Status 201)
+            if (addressInfo != null && addressInfo.cep() != null) {
+                consent.setCep(addressInfo.cep());
+                consent.setLogradouro(addressInfo.logradouro());
+                consent.setBairro(addressInfo.bairro());
+                consent.setCidade(addressInfo.localidade());
+                consent.setUf(addressInfo.uf());
+            }
+        }
+
+        Consent savedConsent = repository.save(consent);
         return new CreationResult(mapper.toResponse(savedConsent), true);
     }
 
     /**
-     * Busca todos os consentimentos com suporte a paginação.
+     * Retorna listagem paginada de consentimentos.
      */
     public Page<ConsentResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     /**
-     * Busca um consentimento específico pelo seu UUID.
+     * Recupera um consentimento por ID.
      */
     public ConsentResponse findById(UUID id) {
-        Consent consent = getConsentByIdOrThrow(id);
-        return mapper.toResponse(consent);
+        return mapper.toResponse(getConsentByIdOrThrow(id));
     }
 
     /**
-     * Atualiza dados de um consentimento existente.
+     * Atualiza dados mutáveis de um registro existente.
      */
     public ConsentResponse update(UUID id, ConsentUpdateRequest request) {
         Consent consent = getConsentByIdOrThrow(id);
         mapper.updateEntityFromRequest(request, consent);
-        Consent updatedConsent = repository.save(consent);
-        return mapper.toResponse(updatedConsent);
+        return mapper.toResponse(repository.save(consent));
     }
 
     /**
-     * Revoga um consentimento alterando seu status.
+     * Executa a revogação lógica do consentimento.
      */
     public ConsentResponse revoke(UUID id) {
         Consent consent = getConsentByIdOrThrow(id);
         consent.setStatus(ConsentStatus.REVOKED);
-        Consent savedConsent = repository.save(consent);
-        return mapper.toResponse(savedConsent);
+        return mapper.toResponse(repository.save(consent));
     }
 
     /**
-     * Metodo auxiliar para centralizar a lógica de busca e erro 404.
+     * Busca entidade no repositório ou lança exceção de recurso não encontrado.
      */
     private Consent getConsentByIdOrThrow(UUID id) {
         return repository.findById(id)

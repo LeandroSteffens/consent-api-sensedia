@@ -6,6 +6,10 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO que representa o payload para atualização de um consentimento existente.
+ * Expõe apenas os campos mutáveis, protegendo dados imutáveis (como CPF e ID) contra alterações indevidas.
+ */
 @Data
 public class ConsentUpdateRequest {
 

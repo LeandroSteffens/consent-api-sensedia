@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+/**
+ * Endpoints REST para gerenciamento do ciclo de vida dos consentimentos.
+ */
 @RestController
 @RequestMapping("/consents")
 @RequiredArgsConstructor
@@ -26,6 +29,10 @@ public class ConsentController {
 
     private final ConsentService service;
 
+    /**
+     * Cria um consentimento, garantindo idempotência através do header X-Idempotency-Key.
+     * Retorna 201 para novos registros e 200 caso a requisição seja repetida.
+     */
     @Operation(summary = "Criar um novo consentimento", description = "Endpoint com suporte a idempotência")
     @PostMapping
     public ResponseEntity<ConsentResponse> createConsent(
@@ -36,12 +43,15 @@ public class ConsentController {
         ConsentService.CreationResult result = service.createConsent(idempotencyKey, request);
 
         if (result.isCreated()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(result.getResponse()); // 201 Created
+            return ResponseEntity.status(HttpStatus.CREATED).body(result.getResponse());
         } else {
-            return ResponseEntity.ok(result.getResponse()); // 200 OK (Retry da mesma chave)
+            return ResponseEntity.ok(result.getResponse());
         }
     }
 
+    /**
+     * Retorna uma listagem paginada dos consentimentos.
+     */
     @Operation(summary = "Listar todos os consentimentos", description = "Retorna uma lista paginada")
     @GetMapping
     public ResponseEntity<Page<ConsentResponse>> getAllConsents(
@@ -51,6 +61,9 @@ public class ConsentController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * Busca os detalhes de um consentimento específico pelo seu UUID.
+     */
     @Operation(summary = "Buscar consentimento por ID")
     @GetMapping("/{id}")
     public ResponseEntity<ConsentResponse> getConsentById(@PathVariable UUID id) {
@@ -58,6 +71,9 @@ public class ConsentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Atualiza dados permitidos (status, validade, informações adicionais) de um consentimento existente.
+     */
     @Operation(summary = "Atualizar informações do consentimento")
     @PutMapping("/{id}")
     public ResponseEntity<ConsentResponse> updateConsent(
@@ -68,6 +84,9 @@ public class ConsentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Executa a exclusão lógica do consentimento, alterando seu status.
+     */
     @Operation(summary = "Revogar um consentimento", description = "Altera o status do consentimento para REVOKED e retorna o objeto atualizado")
     @DeleteMapping("/{id}")
     public ResponseEntity<ConsentResponse> revokeConsent(@PathVariable UUID id) {

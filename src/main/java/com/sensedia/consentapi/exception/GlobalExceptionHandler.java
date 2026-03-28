@@ -11,10 +11,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Interceptador global para tratamento e padronização de erros da API.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Captura os erros de validação do Bean Validation (@Pattern, @NotNull, etc)
+    /**
+     * Trata falhas de validação sintática nos payloads de entrada (Bean Validation).
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult()
@@ -34,7 +39,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    // Captura o nosso erro customizado de "Não encontrado"
+    /**
+     * Trata exceções de recursos não encontrados.
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
@@ -47,7 +54,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
-    // Captura qualquer outro erro inesperado
+    /**
+     * Trata erros genéricos e exceções não mapeadas (Fallback).
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllUncaughtException(Exception ex) {
         ex.printStackTrace();
@@ -56,7 +65,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("Erro interno: " + ex.getMessage())
+                .message("Ocorreu um erro interno inesperado")
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

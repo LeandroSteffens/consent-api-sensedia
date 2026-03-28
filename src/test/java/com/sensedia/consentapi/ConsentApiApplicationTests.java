@@ -21,9 +21,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(TestcontainersConfiguration.class) // Chama o MongoDB via Docker
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) // Sobe a aplicação inteira
-@AutoConfigureMockMvc // Ferramenta para simular requisições HTTP (como o Swagger)
+/**
+ * Testes de integração ponta a ponta utilizando Testcontainers para isolamento do banco de dados.
+ */
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 class ConsentApiApplicationTests {
 
 	@Autowired
@@ -37,45 +40,46 @@ class ConsentApiApplicationTests {
 
 	@BeforeEach
 	void setUp() {
-		// Limpa o banco de dados do Testcontainer antes de cada teste para não ter sujeira
 		repository.deleteAll();
 	}
 
+	/**
+	 * Valida o ciclo de vida de criação e a integridade da regra de idempotência
+	 * integrando com uma instância real de MongoDB.
+	 */
 	@Test
 	@DisplayName("Fluxo Completo: Criar consentimento e testar idempotência com MongoDB Real")
 	void deveCriarConsentimentoETestarIdempotenciaNaIntegracao() throws Exception {
-		// 1. Preparação dos dados (JSON)
+		// Preparação do cenário
 		ConsentCreateRequest request = new ConsentCreateRequest();
 		request.setCpf("123.456.789-00");
 		request.setStatus(ConsentStatus.ACTIVE);
 		request.setExpirationDateTime(LocalDateTime.now().plusYears(1));
 		request.setAdditionalInfo("Teste de Integração Sensedia");
 
-		// Transforma o Objeto Java em JSON
 		String jsonPayload = objectMapper.writeValueAsString(request);
 		String idempotencyKey = "chave-integracao-123";
 
-		// 2. PRIMEIRA CHAMADA (Criação)
+		// Execução e Validação: Primeira chamada (Criação)
 		mockMvc.perform(post("/consents")
 						.header("X-Idempotency-Key", idempotencyKey)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(jsonPayload))
-				.andExpect(status().isCreated()) // Exige HTTP 201
-				.andExpect(jsonPath("$.id").exists()) // Exige que o UUID tenha sido gerado no JSON
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.id").exists())
 				.andExpect(jsonPath("$.cpf").value("123.456.789-00"));
 
-		// Vai no banco de dados MongoDB real e verifica se salvou 1 registro
 		assertEquals(1, repository.count());
 
-		// 3. SEGUNDA CHAMADA (Idempotência)
+		// Execução e Validação: Segunda chamada (Idempotência)
 		mockMvc.perform(post("/consents")
 						.header("X-Idempotency-Key", idempotencyKey)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(jsonPayload))
-				.andExpect(status().isOk()) // Exige HTTP 200
+				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").exists());
 
-		// Vai no banco de dados e garante que continua com apenas 1 registro
+		// Garante que nenhum registro duplicado foi inserido
 		assertEquals(1, repository.count());
 	}
 }

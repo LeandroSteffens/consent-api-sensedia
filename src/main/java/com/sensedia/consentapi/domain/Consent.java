@@ -12,11 +12,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data // Gera Getters, Setters, toString, equals e hashCode
-@Builder // Padrão Builder para facilitar a criação de objetos nos testes e services
-@NoArgsConstructor // Construtor vazio (exigência de frameworks como o Spring/Jackson)
-@AllArgsConstructor // Construtor com todos os argumentos
-@Document(collection = "consents") // Diz ao Spring que isso é uma coleção do MongoDB
+/**
+ * Entidade de domínio representando o consentimento no banco de dados.
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Document(collection = "consents")
 public class Consent {
 
     @Id
@@ -33,7 +36,14 @@ public class Consent {
 
     private String additionalInfo;
 
-    // Para a egra de idempotência
+    // Chave única para garantir a regra de idempotência na criação
     @Indexed(unique = true)
     private String idempotencyKey;
+
+    // Dados de endereço populados via integração externa (ViaCEP)
+    private String cep;
+    private String logradouro;
+    private String bairro;
+    private String cidade;
+    private String uf;
 }
