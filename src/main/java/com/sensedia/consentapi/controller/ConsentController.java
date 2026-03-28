@@ -1,6 +1,7 @@
 package com.sensedia.consentapi.controller;
 
 import com.sensedia.consentapi.dto.ConsentCreateRequest;
+import com.sensedia.consentapi.dto.ConsentHistoryResponse;
 import com.sensedia.consentapi.dto.ConsentResponse;
 import com.sensedia.consentapi.dto.ConsentUpdateRequest;
 import com.sensedia.consentapi.service.ConsentService;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -92,5 +94,15 @@ public class ConsentController {
     public ResponseEntity<ConsentResponse> revokeConsent(@PathVariable UUID id) {
         ConsentResponse response = service.revoke(id);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Retorna a linha do tempo de todas as alterações feitas em um consentimento.
+     */
+    @Operation(summary = "Obter histórico de alterações", description = "Retorna a lista de snapshots (auditoria) do consentimento ordenados pelo mais recente")
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<ConsentHistoryResponse>> getConsentHistory(@PathVariable UUID id) {
+        List<ConsentHistoryResponse> history = service.getHistory(id);
+        return ResponseEntity.ok(history);
     }
 }

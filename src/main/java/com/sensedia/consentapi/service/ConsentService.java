@@ -6,6 +6,7 @@ import com.sensedia.consentapi.domain.Consent;
 import com.sensedia.consentapi.domain.ConsentHistory;
 import com.sensedia.consentapi.domain.ConsentStatus;
 import com.sensedia.consentapi.dto.ConsentCreateRequest;
+import com.sensedia.consentapi.dto.ConsentHistoryResponse;
 import com.sensedia.consentapi.dto.ConsentResponse;
 import com.sensedia.consentapi.dto.ConsentUpdateRequest;
 import com.sensedia.consentapi.exception.ResourceNotFoundException;
@@ -145,5 +146,21 @@ public class ConsentService {
                 .build();
 
         historyRepository.save(history);
+    }
+
+    /**
+     * Retorna a linha do tempo de alterações de um consentimento específico.
+     */
+    public java.util.List<ConsentHistoryResponse> getHistory(UUID consentId) {
+        getConsentByIdOrThrow(consentId);
+
+        return historyRepository.findByConsentIdOrderByTimestampDesc(consentId)
+                .stream()
+                .map(history -> ConsentHistoryResponse.builder()
+                        .action(history.getAction())
+                        .timestamp(history.getTimestamp())
+                        .consentSnapshot(mapper.toResponse(history.getConsentSnapshot()))
+                        .build())
+                .toList();
     }
 }
