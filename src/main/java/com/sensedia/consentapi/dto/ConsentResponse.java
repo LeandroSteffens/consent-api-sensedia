@@ -7,10 +7,6 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * DTO que representa o payload de saída dos consentimentos.
- * Padroniza os dados expostos pela API e formata as datas para o padrão.
- */
 @Data
 public class ConsentResponse {
 
@@ -25,11 +21,4 @@ public class ConsentResponse {
     private LocalDateTime expirationDateTime;
 
     private String additionalInfo;
-
-    // Dados de endereço (populados caso o CEP tenha sido enviado na requisição)
-    private String cep;
-    private String logradouro;
-    private String bairro;
-    private String cidade;
-    private String uf;
 }

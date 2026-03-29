@@ -6,7 +6,6 @@ Este projeto é uma API REST para gestão de consentimentos de usuários no ecos
 
 - Java 21
 - Spring Boot 3.3.4 (Web, Validation, Data MongoDB)
-- Spring WebFlux (WebClient para consumo de API externa)
 - MongoDB
 - Lombok
 - MapStruct
@@ -18,7 +17,6 @@ Este projeto é uma API REST para gestão de consentimentos de usuários no ecos
 ## Funcionalidades e Regras de Negócio
 
 - Idempotência: O endpoint de criação (POST /consents) exige o cabeçalho X-Idempotency-Key. Requisições subsequentes com a mesma chave não geram duplicidade no banco de dados e retornam status 200 OK com o recurso originalmente criado.
-- Integração e Enriquecimento: Utilização de WebClient para consultar a API externa ViaCEP. Caso um CEP válido seja enviado, os dados de endereço são populados automaticamente no registro de consentimento.
 - Exclusão Lógica: A revogação de um consentimento (DELETE /consents/{id}) altera o status do registro para REVOKED, mantendo o histórico na base de dados e retornando o objeto atualizado.
 - Paginação: A listagem de consentimentos (GET /consents) implementa paginação nativa através da interface Pageable do Spring Data.
 - Tratamento Global de Exceções: Utilização de @RestControllerAdvice para interceptar erros de validação (Bean Validation) e recursos não encontrados, padronizando o formato da resposta de erro.

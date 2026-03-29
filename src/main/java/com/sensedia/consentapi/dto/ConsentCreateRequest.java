@@ -10,10 +10,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * DTO que representa o payload de entrada para a criação de um novo consentimento.
- * Contém as regras de validação sintática (Bean Validation) aplicadas na requisição.
- */
 @Data
 public class ConsentCreateRequest {
 
@@ -30,8 +26,4 @@ public class ConsentCreateRequest {
     @Size(min = 1, max = 50, message = "O campo additionalInfo deve ter entre 1 e 50 caracteres")
     private String additionalInfo;
 
-    /**
-     * Campo opcional utilizado para enriquecimento de dados de endereço via integração externa.
-     */
-    private String cep;
 }

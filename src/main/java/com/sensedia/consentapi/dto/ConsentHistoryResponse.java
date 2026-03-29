@@ -5,9 +5,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * DTO que representa um evento na linha do tempo do consentimento.
- */
 @Data
 @Builder
 public class ConsentHistoryResponse {

@@ -7,10 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Repositório responsável pelas operações de persistência relacionadas
- * à auditoria e histórico de consentimentos no MongoDB.
- */
 @Repository
 public interface ConsentHistoryRepository extends MongoRepository<ConsentHistory, UUID> {
 

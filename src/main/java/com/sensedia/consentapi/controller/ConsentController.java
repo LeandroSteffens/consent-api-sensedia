@@ -9,20 +9,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Endpoints REST para gerenciamento do ciclo de vida dos consentimentos.
- */
+@Validated
 @RestController
 @RequestMapping("/consents")
 @RequiredArgsConstructor
@@ -31,29 +32,24 @@ public class ConsentController {
 
     private final ConsentService service;
 
-    /**
-     * Cria um consentimento, garantindo idempotência através do header X-Idempotency-Key.
-     * Retorna 201 para novos registros e 200 caso a requisição seja repetida.
-     */
     @Operation(summary = "Criar um novo consentimento", description = "Endpoint com suporte a idempotência")
     @PostMapping
     public ResponseEntity<ConsentResponse> createConsent(
             @Parameter(description = "Chave de Idempotência", required = true)
+            @NotBlank(message = "A chave de idempotência não pode estar em branco")
+            @Size(max = 255, message = "A chave de idempotência não pode ultrapassar 255 caracteres")
             @RequestHeader("X-Idempotency-Key") String idempotencyKey,
             @Valid @RequestBody ConsentCreateRequest request) {
 
         ConsentService.CreationResult result = service.createConsent(idempotencyKey, request);
 
         if (result.isCreated()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(result.getResponse());
+            return ResponseEntity.status(HttpStatus.CREATED).body(result.response());
         } else {
-            return ResponseEntity.ok(result.getResponse());
+            return ResponseEntity.ok(result.response());
         }
     }
 
-    /**
-     * Retorna uma listagem paginada dos consentimentos.
-     */
     @Operation(summary = "Listar todos os consentimentos", description = "Retorna uma lista paginada")
     @GetMapping
     public ResponseEntity<Page<ConsentResponse>> getAllConsents(
@@ -63,9 +59,6 @@ public class ConsentController {
         return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Busca os detalhes de um consentimento específico pelo seu UUID.
-     */
     @Operation(summary = "Buscar consentimento por ID")
     @GetMapping("/{id}")
     public ResponseEntity<ConsentResponse> getConsentById(@PathVariable UUID id) {
@@ -73,9 +66,6 @@ public class ConsentController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Atualiza dados permitidos (status, validade, informações adicionais) de um consentimento existente.
-     */
     @Operation(summary = "Atualizar informações do consentimento")
     @PutMapping("/{id}")
     public ResponseEntity<ConsentResponse> updateConsent(
@@ -86,9 +76,6 @@ public class ConsentController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Executa a exclusão lógica do consentimento, alterando seu status.
-     */
     @Operation(summary = "Revogar um consentimento", description = "Altera o status do consentimento para REVOKED e retorna o objeto atualizado")
     @DeleteMapping("/{id}")
     public ResponseEntity<ConsentResponse> revokeConsent(@PathVariable UUID id) {
@@ -96,9 +83,6 @@ public class ConsentController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Retorna a linha do tempo de todas as alterações feitas em um consentimento.
-     */
     @Operation(summary = "Obter histórico de alterações", description = "Retorna a lista de snapshots (auditoria) do consentimento ordenados pelo mais recente")
     @GetMapping("/{id}/history")
     public ResponseEntity<List<ConsentHistoryResponse>> getConsentHistory(@PathVariable UUID id) {
