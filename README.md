@@ -23,6 +23,7 @@ Este projeto é uma API REST para gestão de consentimentos de usuários no ecos
 - Paginação: A listagem de consentimentos (GET /consents) implementa paginação nativa através da interface Pageable do Spring Data.
 - Tratamento Global de Exceções: Utilização de @RestControllerAdvice para interceptar erros de validação (Bean Validation) e recursos não encontrados, padronizando o formato da resposta de erro.
 - Proteção de Dados Sensíveis: O endpoint de atualização (PUT /consents/{id}) utiliza DTOs e MapStruct configurados para ignorar campos imutáveis, como ID, CPF e Data de Criação.
+- Trilha de Auditoria: Implementação de um fluxo de histórico que salva automaticamente uma "foto" (snapshot) do consentimento em uma coleção separada (`consent_history`) sempre que ocorre uma mutação (CREATE, UPDATE ou REVOKE). Esse histórico de vida do dado pode ser consultado via endpoint específico (GET /consents/{id}/history).
 
 ## Pré-requisitos
 

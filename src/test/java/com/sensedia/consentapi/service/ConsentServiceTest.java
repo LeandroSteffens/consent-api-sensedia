@@ -1,7 +1,9 @@
 package com.sensedia.consentapi.service;
 
 import com.sensedia.consentapi.client.ViaCepClient;
+import com.sensedia.consentapi.client.ViaCepResponse;
 import com.sensedia.consentapi.domain.Consent;
+import com.sensedia.consentapi.domain.ConsentHistory;
 import com.sensedia.consentapi.domain.ConsentStatus;
 import com.sensedia.consentapi.dto.ConsentCreateRequest;
 import com.sensedia.consentapi.dto.ConsentResponse;
@@ -105,5 +107,54 @@ class ConsentServiceTest {
         assertEquals(ConsentStatus.REVOKED, consent.getStatus());
         assertEquals(ConsentStatus.REVOKED, result.getStatus());
         verify(repository, times(1)).save(consent);
+    }
+
+    @Test
+    @DisplayName("Deve buscar dados de endereço no ViaCEP ao criar consentimento com CEP")
+    void deveChamarViaCepAoCriarConsentimento() {
+        String key = "chave-cep-123";
+        ConsentCreateRequest request = new ConsentCreateRequest();
+        request.setCep("01001000"); // CEP válido
+
+        Consent consent = new Consent();
+        consent.setId(UUID.randomUUID());
+
+        ViaCepResponse viaCepResponse = new ViaCepResponse("01001-000", "Praça da Sé", "Sé", "São Paulo", "SP");
+
+        when(repository.findByIdempotencyKey(key)).thenReturn(Optional.empty());
+        when(mapper.toEntity(any())).thenReturn(consent);
+        when(viaCepClient.getAddressByCep("01001000")).thenReturn(viaCepResponse);
+        when(repository.save(any())).thenReturn(consent);
+
+        service.createConsent(key, request);
+
+        assertEquals("01001-000", consent.getCep());
+        assertEquals("São Paulo", consent.getCidade());
+        verify(viaCepClient, times(1)).getAddressByCep(anyString());
+        verify(historyRepository, times(1)).save(any()); // Garante que salvou histórico
+    }
+
+    @Test
+    @DisplayName("Deve retornar a lista de histórico de um consentimento existente")
+    void deveRetornarHistoricoComSucesso() {
+        UUID id = UUID.randomUUID();
+        Consent consent = new Consent();
+        consent.setId(id);
+
+        ConsentHistory history = ConsentHistory.builder()
+                .action("CREATE")
+                .consentSnapshot(consent)
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
+
+        when(repository.findById(id)).thenReturn(Optional.of(consent));
+        when(historyRepository.findByConsentIdOrderByTimestampDesc(id)).thenReturn(java.util.List.of(history));
+        when(mapper.toResponse(any())).thenReturn(new ConsentResponse());
+
+        var result = service.getHistory(id);
+
+        assertFalse(result.isEmpty());
+        assertEquals("CREATE", result.get(0).getAction());
+        verify(historyRepository, times(1)).findByConsentIdOrderByTimestampDesc(id);
     }
 }
