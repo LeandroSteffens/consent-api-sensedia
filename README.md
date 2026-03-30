@@ -36,13 +36,12 @@ Para executar este projeto, é necessário ter instalado:
 
 ## Como Executar a Aplicação
 
-Passo 1: Suba a infraestrutura do banco de dados (MongoDB) utilizando o Docker Compose:
+A aplicação e a infraestrutura foram totalmente containerizadas para garantir que rodem perfeitamente em qualquer ambiente.
+
+**Passo 1:** Na raiz do projeto, construa a imagem da API e suba os contêineres (Banco de Dados + API) com um único comando:
 > docker-compose up -d
 
-Passo 2: Na raiz do projeto, inicie a aplicação utilizando o Maven Wrapper:
-> ./mvnw spring-boot:run
-
-Passo 3: Acesse a documentação interativa da API (Swagger UI) pelo navegador:
+**Passo 2:** Aguarde alguns segundos para a API compilar e inicializar. Em seguida, acesse a documentação interativa da API (Swagger UI) pelo navegador:
 > http://localhost:8080/swagger-ui.html
 
 **Para testar:** Importe o arquivo `Consent-API` (localizado na raiz do repositório) diretamente no seu aplicativo Insomnia. Ele contém todas as requisições do ciclo de vida da API.
