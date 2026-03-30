@@ -12,6 +12,7 @@ import org.mapstruct.MappingTarget;
 public interface ConsentMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "creationDateTime", ignore = true)
     @Mapping(target = "idempotencyKey", ignore = true)
     Consent toEntity(ConsentCreateRequest request);
@@ -20,6 +21,7 @@ public interface ConsentMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "cpf", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "creationDateTime", ignore = true)
     @Mapping(target = "idempotencyKey", ignore = true)
     void updateEntityFromRequest(ConsentUpdateRequest request, @MappingTarget Consent consent);

@@ -1,7 +1,7 @@
 package com.sensedia.consentapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.sensedia.consentapi.domain.ConsentStatus;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -17,10 +17,9 @@ public class ConsentCreateRequest {
     @Pattern(regexp = "^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$", message = "O CPF deve estar no formato ###.###.###-##")
     private String cpf;
 
-    @NotNull(message = "O status é obrigatório")
-    private ConsentStatus status;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Future(message = "A data de expiração deve ser uma data futura")
+    @NotNull(message = "A data de expiração é obrigatória")
     private LocalDateTime expirationDateTime;
 
     @Size(min = 1, max = 50, message = "O campo additionalInfo deve ter entre 1 e 50 caracteres")

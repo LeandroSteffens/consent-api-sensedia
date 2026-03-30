@@ -2,12 +2,14 @@ package com.sensedia.consentapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sensedia.consentapi.domain.ConsentStatus;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Value
+@Builder
 public class ConsentResponse {
 
     private UUID id;
