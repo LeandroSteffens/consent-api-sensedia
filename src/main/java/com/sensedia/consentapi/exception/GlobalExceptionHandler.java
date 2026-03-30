@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -58,10 +59,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllUncaughtException(Exception ex) {
-        // AQUI É ERROR! Algo fugiu do nosso controle, precisamos da stack trace (ex) para debugar.
         log.error("Erro interno inesperado (500 Internal Server Error)", ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro interno inesperado", null);
     }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ErrorResponse> handleMissingHeader(MissingRequestHeaderException ex) {
+        log.warn("Header obrigatório ausente (400 Bad Request): {}", ex.getHeaderName());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST,
+                "O header '" + ex.getHeaderName() + "' é obrigatório.", null);
+    }
+
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message, List<String> validationErrors) {
         ErrorResponse errorResponse = ErrorResponse.builder()
