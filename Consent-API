@@ -7,7 +7,7 @@ meta:
   modified: 1774831214396
   description: ""
 collection:
-  - url: http://localhost:8080/consents
+  - url: "{{ base_url }}/consents"
     name: Criar novo consentimento
     meta:
       id: req_3451b63a622644af9129bc576c479c3a
@@ -19,9 +19,7 @@ collection:
     method: POST
     body:
       mimeType: application/json
-      text: "{\r   \"cpf\": \"496.434.481-50\",\r   \"status\":
-        \"ACTIVE\",\r   \"expirationDateTime\":
-        \"2026-03-30T00:43:46.526Z\",\r   \"additionalInfo\": \"teste\"\r }"
+      text: "{\r   \"cpf\": \"496.434.481-50\",\r   \"status\": \"ACTIVE\",\r   \"expirationDateTime\": \"2026-03-30T00:43:46.526Z\",\r   \"additionalInfo\": \"teste\"\r }"
     headers:
       - name: accept
         value: "*/*"
@@ -37,7 +35,7 @@ collection:
         send: true
         store: true
       rebuildPath: true
-  - url: http://localhost:8080/consents/id
+  - url: "{{ base_url }}/consents/COLE_O_ID_AQUI"
     name: Buscar consetimento por ID
     meta:
       id: req_ff4c642714b247bcb7f720dea22a6a7f
@@ -58,7 +56,7 @@ collection:
         send: true
         store: true
       rebuildPath: true
-  - url: http://localhost:8080/consents/id
+  - url: "{{ base_url }}/consents/COLE_O_ID_AQUI"
     name: Atualizar informações do consentimento
     meta:
       id: req_f9c1868c341d441eaf2140e5e003e54a
@@ -70,8 +68,7 @@ collection:
     method: PUT
     body:
       mimeType: application/json
-      text: "{\r   \"status\": \"ACTIVE\",\r   \"expirationDateTime\":
-        \"2026-03-30T00:46:29.935Z\",\r   \"additionalInfo\": \"teste1\"\r }"
+      text: "{\r   \"status\": \"ACTIVE\",\r   \"expirationDateTime\": \"2026-03-30T00:46:29.935Z\",\r   \"additionalInfo\": \"teste1\"\r }"
     headers:
       - name: accept
         value: "*/*"
@@ -85,7 +82,7 @@ collection:
         send: true
         store: true
       rebuildPath: true
-  - url: http://localhost:8080/consents/id
+  - url: "{{ base_url }}/consents/COLE_O_ID_AQUI"
     name: Revogar um consentimento
     meta:
       id: req_df8785b8c95d494eb68220e4189ad8ee
@@ -106,7 +103,7 @@ collection:
         send: true
         store: true
       rebuildPath: true
-  - url: http://localhost:8080/consents
+  - url: "{{ base_url }}/consents"
     name: Listar consentimentos
     meta:
       id: req_8d40d8763cbd4afe840a8d3763feb141
@@ -137,7 +134,7 @@ collection:
         send: true
         store: true
       rebuildPath: true
-  - url: http://localhost:8080/consents/id/history
+  - url: "{{ base_url }}/consents/COLE_O_ID_AQUI/history"
     name: Obter histórico de alterações
     meta:
       id: req_b3dd59297a8b4525add82e33faa34064

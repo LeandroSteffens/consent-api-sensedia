@@ -44,6 +44,8 @@ public class ConsentService {
         if (consent.getId() == null) consent.setId(UUID.randomUUID());
         consent.setIdempotencyKey(idempotencyKey);
 
+        consent.setCreationDateTime(LocalDateTime.now());
+
         Consent savedConsent = repository.save(consent);
         registerHistory(savedConsent, "CREATE");
         return new CreationResult(mapper.toResponse(savedConsent), true);

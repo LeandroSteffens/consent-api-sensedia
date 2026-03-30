@@ -13,6 +13,8 @@ Este projeto é uma API REST para gestão de consentimentos de usuários no ecos
 - JUnit 5 & Mockito
 - Testcontainers
 - Docker & Docker Compose
+- SLF4J & Logback
+- Spring Scheduling
 
 ## Funcionalidades e Regras de Negócio
 
@@ -22,6 +24,9 @@ Este projeto é uma API REST para gestão de consentimentos de usuários no ecos
 - Tratamento Global de Exceções: Utilização de @RestControllerAdvice para interceptar erros de validação (Bean Validation) e recursos não encontrados, padronizando o formato da resposta de erro.
 - Proteção de Dados Sensíveis: O endpoint de atualização (PUT /consents/{id}) utiliza DTOs e MapStruct configurados para ignorar campos imutáveis, como ID, CPF e Data de Criação.
 - Trilha de Auditoria: Implementação de um fluxo de histórico que salva automaticamente uma "foto" (snapshot) do consentimento em uma coleção separada (`consent_history`) sempre que ocorre uma mutação (CREATE, UPDATE ou REVOKE). Esse histórico de vida do dado pode ser consultado via endpoint específico (GET /consents/{id}/history).
+- Rotina de Expiração Automática: O sistema possui um job rodando em background (via `@Scheduled` com Cron) que identifica e altera o status de consentimentos vencidos para EXPIRED, registrando a ação na trilha de auditoria.
+- Conformidade de Fuso Horário: A aplicação é forçada a inicializar em UTC (Zero offset) via `@PostConstruct`, garantindo que todas as datas e horas trafegadas sigam o padrão ISO 8601.
+- Sistema de Logs: Implementação de logs separados por níveis de severidade (INFO, WARN, ERROR) no `GlobalExceptionHandler` e no `ConsentExpirationScheduler` para monitoramento de rotinas, tratamento de exceções e auditoria.
 
 ## Pré-requisitos
 
@@ -39,6 +44,8 @@ Passo 2: Na raiz do projeto, inicie a aplicação utilizando o Maven Wrapper:
 
 Passo 3: Acesse a documentação interativa da API (Swagger UI) pelo navegador:
 > http://localhost:8080/swagger-ui.html
+
+**Para testar:** Importe o arquivo `Consent-API` (localizado na raiz do repositório) diretamente no seu aplicativo Insomnia. Ele contém todas as requisições do ciclo de vida da API.
 
 ## Como Executar os Testes
 
