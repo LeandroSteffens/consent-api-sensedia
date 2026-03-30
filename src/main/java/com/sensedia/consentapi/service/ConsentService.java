@@ -41,6 +41,7 @@ public class ConsentService {
         }
 
         Consent consent = mapper.toEntity(request);
+        consent.setStatus(ConsentStatus.ACTIVE);
         if (consent.getId() == null) consent.setId(UUID.randomUUID());
         consent.setIdempotencyKey(idempotencyKey);
 
@@ -65,8 +66,9 @@ public class ConsentService {
     public ConsentResponse update(UUID id, ConsentUpdateRequest request) {
         Consent consent = getConsentByIdOrThrow(id);
 
-        if (ConsentStatus.REVOKED.equals(consent.getStatus())) {
-            throw new IllegalArgumentException("Não é possível alterar um consentimento que já foi revogado.");
+        if (!ConsentStatus.ACTIVE.equals(consent.getStatus())) {
+            throw new IllegalArgumentException(
+                "Só é possível alterar consentimentos com status ACTIVE. Status atual: " + consent.getStatus());
         }
 
         mapper.updateEntityFromRequest(request, consent);
@@ -79,6 +81,12 @@ public class ConsentService {
 
     public ConsentResponse revoke(UUID id) {
         Consent consent = getConsentByIdOrThrow(id);
+
+        if (!ConsentStatus.ACTIVE.equals(consent.getStatus())) {
+            throw new IllegalArgumentException(
+                "Só é possível revogar consentimentos com status ACTIVE. Status atual: " + consent.getStatus());
+        }
+        
         consent.setStatus(ConsentStatus.REVOKED);
 
         Consent savedConsent = repository.save(consent);
