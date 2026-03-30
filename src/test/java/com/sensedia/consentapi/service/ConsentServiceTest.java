@@ -5,6 +5,7 @@ import com.sensedia.consentapi.domain.ConsentHistory;
 import com.sensedia.consentapi.domain.ConsentStatus;
 import com.sensedia.consentapi.dto.ConsentCreateRequest;
 import com.sensedia.consentapi.dto.ConsentResponse;
+import com.sensedia.consentapi.dto.ConsentUpdateRequest;
 import com.sensedia.consentapi.exception.ResourceNotFoundException;
 import com.sensedia.consentapi.mapper.ConsentMapper;
 import com.sensedia.consentapi.repository.ConsentHistoryRepository;
@@ -129,6 +130,42 @@ class ConsentServiceTest {
         verify(repository, never()).save(any());
     }
 
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar atualizar consentimento REVOKED")
+    void shouldThrowWhenUpdatingRevokedConsent() {
+        UUID id = UUID.randomUUID();
+        Consent consent = buildConsent(id, ConsentStatus.REVOKED);
+        when(repository.findById(id)).thenReturn(Optional.of(consent));
+
+        assertThrows(IllegalArgumentException.class, 
+            () -> service.update(id, new ConsentUpdateRequest()));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar atualizar consentimento EXPIRED")
+    void shouldThrowWhenUpdatingExpiredConsent() {
+        UUID id = UUID.randomUUID();
+        Consent consent = buildConsent(id, ConsentStatus.EXPIRED);
+        when(repository.findById(id)).thenReturn(Optional.of(consent));
+
+        assertThrows(IllegalArgumentException.class,
+            () -> service.update(id, new ConsentUpdateRequest()));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar revogar consentimento já REVOKED")
+    void shouldThrowWhenRevokingAlreadyRevokedConsent() {
+        UUID id = UUID.randomUUID();
+        Consent consent = buildConsent(id, ConsentStatus.REVOKED);
+        when(repository.findById(id)).thenReturn(Optional.of(consent));
+
+        assertThrows(IllegalArgumentException.class,
+            () -> service.revoke(id));
+        verify(repository, never()).save(any());
+    }
+
+
     private Consent buildConsent(UUID id, ConsentStatus status) {
         return Consent.builder()
                 .id(id)
@@ -142,16 +179,15 @@ class ConsentServiceTest {
     private ConsentCreateRequest buildCreateRequest() {
         ConsentCreateRequest request = new ConsentCreateRequest();
         request.setCpf("123.456.789-00");
-        request.setStatus(ConsentStatus.ACTIVE);
         request.setExpirationDateTime(LocalDateTime.now().plusYears(1));
         return request;
     }
 
     private ConsentResponse buildConsentResponse(ConsentStatus status) {
-        ConsentResponse response = new ConsentResponse();
-        response.setCpf("123.456.789-00");
-        response.setStatus(status);
-        return response;
+        return ConsentResponse.builder()
+                .cpf("123.456.789-00")
+                .status(status)
+                .build();
     }
 
     private ConsentHistory buildConsentHistory(Consent snapshot, String action) {

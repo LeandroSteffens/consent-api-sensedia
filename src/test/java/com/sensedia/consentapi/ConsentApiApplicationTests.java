@@ -95,7 +95,6 @@ class ConsentApiApplicationTests {
 	private String buildValidConsentJsonPayload() throws Exception {
 		ConsentCreateRequest request = new ConsentCreateRequest();
 		request.setCpf("123.456.789-00");
-		request.setStatus(ConsentStatus.ACTIVE);
 		request.setExpirationDateTime(LocalDateTime.now().plusYears(1));
 		request.setAdditionalInfo("Teste de Integração Sensedia");
 
