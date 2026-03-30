@@ -1,0 +1,175 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Consent API
+meta:
+  id: wrk_10a1f04a03894b1eb93f2d6e1774744a
+  created: 1774831214396
+  modified: 1774831214396
+  description: ""
+collection:
+  - url: http://localhost:8080/consents
+    name: Criar novo consentimento
+    meta:
+      id: req_3451b63a622644af9129bc576c479c3a
+      created: 1774831452237
+      modified: 1774831818863
+      isPrivate: false
+      description: ""
+      sortKey: -1774831452237
+    method: POST
+    body:
+      mimeType: application/json
+      text: "{\r   \"cpf\": \"496.434.481-50\",\r   \"status\":
+        \"ACTIVE\",\r   \"expirationDateTime\":
+        \"2026-03-30T00:43:46.526Z\",\r   \"additionalInfo\": \"teste\"\r }"
+    headers:
+      - name: accept
+        value: "*/*"
+      - name: X-Idempotency-Key
+        value: chave-teste
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/consents/id
+    name: Buscar consetimento por ID
+    meta:
+      id: req_ff4c642714b247bcb7f720dea22a6a7f
+      created: 1774831495822
+      modified: 1774831823238
+      isPrivate: false
+      description: ""
+      sortKey: -1774831495822
+    method: GET
+    headers:
+      - name: accept
+        value: "*/*"
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/consents/id
+    name: Atualizar informações do consentimento
+    meta:
+      id: req_f9c1868c341d441eaf2140e5e003e54a
+      created: 1774831617963
+      modified: 1774831847598
+      isPrivate: false
+      description: ""
+      sortKey: -1774831617963
+    method: PUT
+    body:
+      mimeType: application/json
+      text: "{\r   \"status\": \"ACTIVE\",\r   \"expirationDateTime\":
+        \"2026-03-30T00:46:29.935Z\",\r   \"additionalInfo\": \"teste1\"\r }"
+    headers:
+      - name: accept
+        value: "*/*"
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/consents/id
+    name: Revogar um consentimento
+    meta:
+      id: req_df8785b8c95d494eb68220e4189ad8ee
+      created: 1774831714360
+      modified: 1774831858160
+      isPrivate: false
+      description: ""
+      sortKey: -1774831714360
+    method: DELETE
+    headers:
+      - name: accept
+        value: "*/*"
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/consents
+    name: Listar consentimentos
+    meta:
+      id: req_8d40d8763cbd4afe840a8d3763feb141
+      created: 1774831749302
+      modified: 1774831868086
+      isPrivate: false
+      description: ""
+      sortKey: -1774831749302
+    method: GET
+    parameters:
+      - name: page
+        value: "0"
+        disabled: false
+      - name: size
+        value: "1"
+        disabled: false
+      - name: sort
+        value: '["string"]'
+        disabled: false
+    headers:
+      - name: accept
+        value: "*/*"
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/consents/id/history
+    name: Obter histórico de alterações
+    meta:
+      id: req_b3dd59297a8b4525add82e33faa34064
+      created: 1774831898080
+      modified: 1774831926940
+      isPrivate: false
+      description: ""
+      sortKey: -1774831898080
+    method: GET
+    headers:
+      - name: accept
+        value: "*/*"
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_65a918242d806e5630d24319b9a1462111274f74
+    created: 1774831214398
+    modified: 1774831214398
+environments:
+  name: Base Environment
+  meta:
+    id: env_65a918242d806e5630d24319b9a1462111274f74
+    created: 1774831214397
+    modified: 1774831275622
+    isPrivate: false
+  data:
+    base_url: http://localhost:8080

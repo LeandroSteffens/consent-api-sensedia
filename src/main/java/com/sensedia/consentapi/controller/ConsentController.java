@@ -50,7 +50,7 @@ public class ConsentController {
         }
     }
 
-    @Operation(summary = "Listar todos os consentimentos", description = "Retorna uma lista paginada")
+    @Operation(summary = "Listar os consentimentos", description = "Retorna uma lista paginada")
     @GetMapping
     public ResponseEntity<Page<ConsentResponse>> getAllConsents(
             @PageableDefault(size = 10) Pageable pageable) {
